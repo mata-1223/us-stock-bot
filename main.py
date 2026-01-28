@@ -1,8 +1,10 @@
 import pandas as pd
+import time
 from datetime import datetime
 from src.collectors.stock_loader import StockDataLoader
 from src.strategies.indicators import TechnicalAnalyzer
 from src.agents.news_agent import NewsAgent
+from src.agents.llm_agent import LLMNewsAgent
 from src.utils.notifier import TelegramBot
 
 def main():
@@ -46,37 +48,54 @@ def main():
     print(f"\n🔎 Found {len(today_signals)} stocks. Analyzing news...\n")
     
     # 4. AI 에이전트 분석 및 리포트 작성
-    news_agent = NewsAgent(max_results=3)
+    news_agent = NewsAgent(max_results=5) # 검색 담당 (기존 에이전트 활용)
+    brain_agent = LLMNewsAgent()            # 분석 담당 (Gemini)
 
-    for _, row in today_signals.iterrows():
-        ticker = row['ticker']
-        price = row['close']
-        rsi = row['rsi_14']
-        
-        # 터미널 출력용
-        print(f"Analyzing {ticker}...")
+    # 전체 종목 개수 파악
+    total_signals = len(today_signals)
 
-        # 뉴스 분석
-        news_items = news_agent.search_news(ticker)
-        sentiment = news_agent.analyze_sentiment(news_items)
-        
-        # 이모지 결정
-        score = sentiment['score']
-        icon = "⚖️"
-        if score > 0.1: icon = "✅"
-        elif score < -0.2: icon = "⚠️"
+    for i, (_, row) in enumerate(today_signals.iterrows()):
+            ticker = row['ticker']
+            price = row['close']
+            rsi = row['rsi_14']
+            
+            print(f"Analyzing {ticker} ({i+1}/{total_signals})...")
 
-        # 메시지 구성 (Markdown 문법)
-        report_msg += f"🎯 *{ticker}* (RSI: {rsi:.1f})\n"
-        report_msg += f"💰 Price: ${price:.2f}\n"
-        report_msg += f"{icon} AI: {sentiment['summary']} ({score:.2f})\n"
-        
-        if news_items:
-            # 텔레그램은 특수문자 처리가 까다로워서 제목만 심플하게
-            top_news = news_items[0]['title'].replace("[", "(").replace("]", ")")
-            report_msg += f"📰 News: {top_news}\n"
-        
-        report_msg += "--------------------------------\n"
+            # 1. 뉴스 검색
+            news_items = news_agent.search_news(ticker)
+            
+            # 2. LLM 분석
+            ai_result = brain_agent.analyze_news(ticker, news_items)
+            
+            summary = ai_result['summary']
+            score = ai_result['score']
+            sentiment = ai_result['sentiment']
+
+            # 이모지 결정
+            icon = "⚖️"
+            if score > 0.2: icon = "🔥"
+            elif score < -0.2: icon = "💧"
+
+            # 메시지 구성
+            report_msg += f"🎯 *{ticker}* (RSI: {rsi:.1f})\n"
+            report_msg += f"💰 Price: ${price:.2f}\n"
+            report_msg += f"{icon} AI: {summary}\n"
+            report_msg += f"📊 Score: {score} ({sentiment})\n"
+            
+            if news_items:
+                top_news = news_items[0]['title'].replace("[", "(").replace("]", ")")
+                report_msg += f"📰 News: {top_news}\n"
+            
+            report_msg += "--------------------------------\n"
+            
+            # [수정 3] 마지막 종목이 아닐 때만 15초 대기
+            if i < total_signals - 1:
+                # print(f"[*] Sleeping 15s to avoid API rate limit...")
+                # time.sleep(15)
+                pass
+            else:
+                # print("[*] All analysis complete. Skipping sleep.")
+                print("[*] All analysis complete.")
 
     # 5. 최종 리포트 전송
     print("\n[*] Sending Report to Telegram...")
