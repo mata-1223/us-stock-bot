@@ -1,0 +1,35 @@
+name: Daily US Stock Report
+
+on:
+  # 1. 스케줄링: 한국 시간 아침 7시 (UTC 22:00) - 평일에만 실행
+  schedule:
+    - cron: '0 22 * * 1-5'
+  
+  # 2. 수동 실행: GitHub 웹사이트에서 버튼 눌러서 즉시 실행 가능
+  workflow_dispatch:
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 코드 내려받기
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. uv 설치 (Python 패키지 관리자)
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+          enable-cache: true
+
+      # 3. 의존성 설치 및 봇 실행
+      - name: Run Stock Bot
+        # GitHub Secrets에 저장된 환경변수를 주입합니다
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          uv sync
+          uv run main.py

@@ -1,0 +1,17 @@
+[project]
+name = "stock-bot"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "ddgs>=9.10.0",
+    "numpy>=2.4.1",
+    "pandas>=3.0.0",
+    "pyarrow>=23.0.0",
+    "python-dotenv>=1.2.1",
+    "requests>=2.32.5",
+    "textblob>=0.19.0",
+    "typeguard>=4.4.4",
+    "yfinance>=1.1.0",
+]
