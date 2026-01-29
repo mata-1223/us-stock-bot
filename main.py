@@ -4,8 +4,8 @@ from datetime import datetime
 from src.collectors.stock_loader import StockDataLoader
 from src.strategies.indicators import TechnicalAnalyzer
 from src.agents.news_agent import NewsAgent
-from src.agents.llm_agent import LLMNewsAgent
 from src.utils.notifier import TelegramBot
+from src.agents.llm_agent import get_llm_agent
 
 def main():
     # 1. 설정 및 봇 초기화
@@ -49,7 +49,11 @@ def main():
     
     # 4. AI 에이전트 분석 및 리포트 작성
     news_agent = NewsAgent(max_results=5) # 검색 담당 (기존 에이전트 활용)
-    brain_agent = LLMNewsAgent()            # 분석 담당 (Gemini)
+    try:
+        brain_agent = get_llm_agent()            # 분석 담당 AI
+    except Exception as e:
+        print(f"[!] AI Agent Init Failed: {e}")
+        return
 
     # 전체 종목 개수 파악
     total_signals = len(today_signals)
