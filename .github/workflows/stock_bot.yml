@@ -35,6 +35,7 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GROQ_MODEL: ${{ secrets.GROQ_MODEL }}
           OLLAMA_MODEL: ${{ secrets.OLLAMA_MODEL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
           uv sync
           uv run main.py

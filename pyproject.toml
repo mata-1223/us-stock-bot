@@ -5,9 +5,14 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "crewai>=1.6.1",
+    "crewai-tools>=1.6.1",
     "ddgs>=9.10.0",
+    "duckduckgo-search>=8.1.1",
     "google-genai>=1.60.0",
     "groq>=1.0.0",
+    "langchain-community>=0.4.1",
+    "litellm>=1.81.5",
     "numpy>=2.4.1",
     "ollama>=0.6.1",
     "pandas>=3.0.0",
