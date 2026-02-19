@@ -61,7 +61,7 @@ task2 = Task(
     agent=writer,
     expected_output='3문단 이내의 한국어 블로그 포스팅',
     context=[task1]
-)
+)=
 
 # --- 5. 팀(Crew) 결성 및 실행 ---
 

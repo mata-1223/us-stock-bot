@@ -15,7 +15,7 @@ def main():
     db_manager = DBManager()
 
     # 1. 설정 및 봇 초기화
-    tickers = ["AAPL", "TSLA", "NVDA", "AMZN", "GOOGL", "SPY"]
+    tickers = ["AAPL", "TSLA", "NVDA", "AMZN", "GOOGL", "SPY", "JOBY"]
     bot = TelegramBot()
     
     # 리포트 메시지를 담을 문자열 버퍼
